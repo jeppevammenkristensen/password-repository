@@ -15,7 +15,9 @@
     "Microsoft.Extensions.Logging": "1.1.0",
     "Microsoft.Extensions.Logging.Console": "1.1.0",
     "Microsoft.Extensions.Logging.Debug": "1.1.0",
-    "Microsoft.Extensions.Options.ConfigurationExtensions": "1.1.0"
+    "Microsoft.Extensions.Options.ConfigurationExtensions": "1.1.0",
+    "mongocsharpdriver": "2.4.1",
+    "BouncyCastle.NetCore": "1.8.1.2"
   },
 
   "tools": {
@@ -33,7 +35,8 @@
 
   "buildOptions": {
     "emitEntryPoint": true,
-    "preserveCompilationContext": true
+    "preserveCompilationContext": true,
+    "debugType": "portable"
   },
 
   "runtimeOptions": {
