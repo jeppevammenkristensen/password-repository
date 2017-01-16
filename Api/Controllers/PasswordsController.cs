@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Api.Models.Commands;
 using Api.Models.Commands.Mongo;
 using Api.Models.Encryption;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -13,10 +16,12 @@ namespace Api.Controllers
     public class PasswordsController : Controller
     {
         private readonly IPasswordCommandExecutor _commandExecutor;
+        private readonly IHostingEnvironment _hostingEnvironment;
 
-        public PasswordsController(IPasswordCommandExecutor commandExecutor)
+        public PasswordsController(IPasswordCommandExecutor commandExecutor, IHostingEnvironment hostingEnvironment)
         {
             _commandExecutor = commandExecutor;
+            _hostingEnvironment = hostingEnvironment;
         }
 
         // GET api/values
@@ -51,6 +56,23 @@ namespace Api.Controllers
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+        }
+
+        [HttpPost("Upload")]
+        public async Task<Guid> UploadFiles(IList<IFormFile> files)
+        {
+            var guid = Guid.NewGuid();
+            foreach (var formFile in files)
+            {
+                var filename = Path.Combine(this._hostingEnvironment.WebRootPath,"upload", $"{guid}.txt");
+                using (var fs = System.IO.File.Create(filename))
+                {
+                    await formFile.CopyToAsync(fs);
+                    await fs.FlushAsync();
+                }
+            }
+
+            return guid;
         }
     }
 }
