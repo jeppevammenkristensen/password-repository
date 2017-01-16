@@ -1,3 +1,9 @@
 <template>
   <h1>${message}</h1>
+  
+  <form>
+    <input type="file" name="" files.bind="uploadedFiles" multiple>
+  <button type="" click.delegate="upload()" show.bind="uploadedFiles">Upload</button>
+  </form>
+  
 </template>

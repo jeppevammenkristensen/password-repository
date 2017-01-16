@@ -4,7 +4,7 @@ define('environment',["require", "exports"], function (require, exports) {
     exports.default = {
         debug: true,
         testing: true,
-        api: 'http://localhost:5001/api'
+        api: 'http://localhost:5000/api'
     };
 });
 
@@ -22,13 +22,33 @@ define('app',["require", "exports", "aurelia-fetch-client", "aurelia-framework",
     var App = (function () {
         function App(client) {
             this.client = client;
+            this.uploadedFiles = null;
             this.message = 'Hello World!';
+            this.client.configure(function (config) {
+                config.useStandardConfiguration();
+            });
         }
         App.prototype.attached = function () {
-            return this.client.fetch(environment_1.default.api + "/passwords")
-                .then(function (response) { return response.json(); })
-                .then(function (x) { return alert(x); })
+        };
+        App.prototype.upload = function () {
+            var _this = this;
+            var formData = new FormData();
+            for (var i = 0; i < this.uploadedFiles.length; i++) {
+                formData.append('uploadedFiles', this.uploadedFiles[0]);
+            }
+            return this.client.fetch(environment_1.default.api + "/passwords/upload", {
+                method: 'post',
+                body: formData
+            }).then(function (x) { return x.json(); })
+                .then(function (x) { return _this.uploadedId[0]; })
                 .catch(function (rej) { return alert(rej); });
+        };
+        App.prototype.process = function () {
+            return this.client.fetch(environment_1.default.api + "/password/process/" + this.uploadedId, {
+                method: 'get',
+            })
+                .then(function (x) { return x.json(); })
+                .then(function (x) { return alert(x); });
         };
         return App;
     }());
@@ -68,5 +88,5 @@ define('resources/index',["require", "exports"], function (require, exports) {
     exports.configure = configure;
 });
 
-define('text!app.html', ['module'], function(module) { module.exports = "<template><h1>${message}</h1></template>"; });
+define('text!app.html', ['module'], function(module) { module.exports = "<template><h1>${message}</h1><form><input type=\"file\" name=\"\" files.bind=\"uploadedFiles\" multiple=\"multiple\"> <button type=\"\" click.delegate=\"upload()\" show.bind=\"uploadedFiles\">Upload</button></form></template>"; });
 //# sourceMappingURL=app-bundle.js.map

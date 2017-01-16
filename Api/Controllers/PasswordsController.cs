@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Api.Models.Commands;
 using Api.Models.Commands.Mongo;
@@ -59,20 +60,41 @@ namespace Api.Controllers
         }
 
         [HttpPost("Upload")]
-        public async Task<Guid> UploadFiles(IList<IFormFile> files)
+        public async Task<List<Guid>> UploadFiles(IList<IFormFile> uploadedFiles)
         {
-            var guid = Guid.NewGuid();
-            foreach (var formFile in files)
+            var result = new List<Guid>();
+
+            foreach (var formFile in uploadedFiles)
             {
+                var guid = Guid.NewGuid();
                 var filename = Path.Combine(this._hostingEnvironment.WebRootPath,"upload", $"{guid}.txt");
                 using (var fs = System.IO.File.Create(filename))
                 {
                     await formFile.CopyToAsync(fs);
                     await fs.FlushAsync();
                 }
+
+                result.Add(guid);
             }
 
-            return guid;
+            return result;
+        }
+        [HttpGet("Process/{id}")]
+        public async Task<object> Process(Guid id)
+        {
+            var path = Path.Combine(this._hostingEnvironment.WebRootPath, "upload", $"{id}.txt");
+            var items = new List<string>();
+
+            using (var file = new StreamReader(System.IO.File.OpenRead(path), Encoding.GetEncoding("iso-8859-1")))
+            {
+                if (file.Peek() >= 0)
+                {
+                    var result = await file.ReadLineAsync();
+                    items.Add(result);
+                }
+            }
+
+            return items;
         }
     }
 }
